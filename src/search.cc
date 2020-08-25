@@ -26,8 +26,10 @@ Thread::Thread(std::size_t id)
 Value Thread::search(const Position &position, Value alpha, Value beta, const Depth depth,
 					 const Depth plies_to_root, MoveSequence &pv)
 {
+	const Nodes total_nodes_searched = nodes_searched() + qnodes_searched();
+
 	// Check for stop signal or if we've reached the node limit
-	if (should_stop() || (limits.nodes && (nodes_searched() + qnodes_searched()) >= limits.nodes))
+	if (should_stop() || (limits.nodes && total_nodes_searched >= limits.nodes))
 	{
 		// If we are in check, the position is probably dangerous. Return draw value instead.
 		return position.checkers() ? Draw : eval::evaluate(position);
@@ -39,7 +41,7 @@ Value Thread::search(const Position &position, Value alpha, Value beta, const De
 	// Check for draw by fifty moves / threefold repetition
 	// The value we return here is Draw ± 1, which solves an issue with threefold blindness.
 	if (position.is_draw_by_rule50() || std::count(key_history.begin(), key_history.end(), key) >= 3)
-		return (nodes_searched() & 3) - 1;
+		return (total_nodes_searched & 3) - 1;
 
 	// Update selective depth
 	sel_depth = util::max(sel_depth, plies_to_root);
@@ -112,6 +114,7 @@ Value Thread::search(const Position &position, Value alpha, Value beta, const De
 
 		const Piece moved_piece = position.moved_piece(move);
 		const bool is_capture = position.is_capture(move);
+		const bool is_promotion = move.is_promotion();
 
 		// Make a copy, apply the move, store new key in key stack, and increment nodes counter
 		Position next_position {position};
@@ -148,7 +151,7 @@ Value Thread::search(const Position &position, Value alpha, Value beta, const De
 				bound = Bound::Lower;
 
 				// Update heuristics for quiet moves
-				if (!is_capture)
+				if (!is_capture && !is_promotion)
 				{
 					heuristics.history.update(depth * depth, moved_piece, move.to());
 					heuristics.killer.update(depth, move);
@@ -182,12 +185,14 @@ Value Thread::search(const Position &position, Value alpha, Value beta, const De
 Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 					  const Depth plies_to_root, MoveSequence &pv)
 {
+	const Nodes total_nodes_searched = nodes_searched() + qnodes_searched();
+
 	// Check time (main thread only)
-	if (is_main_thread() && (nodes_searched() + qnodes_searched()) % CheckTimeEvery == 0)
+	if (is_main_thread() && total_nodes_searched % CheckTimeEvery == 0)
 		static_cast<MainThread *>(this)->check_time_fast();
 
 	// Check for stop signal or if we've reached the node limit
-	if (should_stop() || (limits.nodes && (nodes_searched() + qnodes_searched()) >= limits.nodes))
+	if (should_stop() || (limits.nodes && total_nodes_searched >= limits.nodes))
 	{
 		// If we are in check, the position is probably dangerous. Return draw value instead.
 		return position.checkers() ? Draw : eval::evaluate(position);
@@ -197,7 +202,7 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 	// The value we return here is Draw ± 1, which solves an issue with threefold blindness.
 	if (   position.is_draw_by_rule50()
 		|| std::count(key_history.begin(), key_history.end(), position.key()) >= 3)
-		return (qnodes_searched() & 3) - 1;
+		return (total_nodes_searched & 3) - 1;
 
 	// Update selective depth
 	sel_depth = util::max(sel_depth, plies_to_root);
@@ -212,6 +217,7 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 	// "stand pat" evaluation, only when not in check
 	if (!position.checkers())
 	{
+		// Add a small random component to eval
 		const Value stand_pat = eval::evaluate(position);
 
 		if (stand_pat >= beta)
@@ -292,7 +298,7 @@ void Thread::think()
 	Value value = -Infinite;
 	MoveSequence pv;
 
-	nodes = qnodes = 0;
+	clear();
 
 	for (id_depth = 1; (  ((!limits.depth || id_depth <= limits.depth)
 						|| limits.infinite) && !should_stop()); ++id_depth)
@@ -356,9 +362,6 @@ void MainThread::think()
 	// todo: this isn't actually implemented yet, an always-replace strategy is used
 	// Increment transposition table epoch, so old entries are immediately overwritten
 	tt.increment_epoch();
-
-	// Clear statistics/heuristics
-	clear();
 
 	// Set search start time
 	times_up = false;
