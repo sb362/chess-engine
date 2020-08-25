@@ -6,21 +6,20 @@ using namespace chess;
 
 Value eval::evaluate(const Position &position)
 {
-	const Colour us = position.side_to_move();
-
 	Value value = Draw;
 
 	// Material
-	value += PawnValue   * position.count(us, PieceType::Pawn);
-	value += KnightValue * position.count(us, PieceType::Knight);
-	value += BishopValue * position.count(us, PieceType::Bishop);
-	value += RookValue   * position.count(us, PieceType::Rook);
-	value += QueenValue  * position.count(us, PieceType::Queen);
-	value -= PawnValue   * position.count(~us, PieceType::Pawn);
-	value -= KnightValue * position.count(~us, PieceType::Knight);
-	value -= BishopValue * position.count(~us, PieceType::Bishop);
-	value -= RookValue   * position.count(~us, PieceType::Rook);
-	value -= QueenValue  * position.count(~us, PieceType::Queen);
+	value += PawnValue   * position.count(Colour::White, PieceType::Pawn);
+	value += KnightValue * position.count(Colour::White, PieceType::Knight);
+	value += BishopValue * position.count(Colour::White, PieceType::Bishop);
+	value += RookValue   * position.count(Colour::White, PieceType::Rook);
+	value += QueenValue  * position.count(Colour::White, PieceType::Queen);
 
-	return value;
+	value -= PawnValue   * position.count(Colour::Black, PieceType::Pawn);
+	value -= KnightValue * position.count(Colour::Black, PieceType::Knight);
+	value -= BishopValue * position.count(Colour::Black, PieceType::Bishop);
+	value -= RookValue   * position.count(Colour::Black, PieceType::Rook);
+	value -= QueenValue  * position.count(Colour::Black, PieceType::Queen);
+
+	return position.side_to_move() == Colour::White ? value : -value;
 }

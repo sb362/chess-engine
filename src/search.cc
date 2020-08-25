@@ -199,10 +199,9 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 	}
 
 	// Check for draw by fifty moves / threefold repetition
-	// The value we return here is Draw ± 1, which solves an issue with threefold blindness.
 	if (   position.is_draw_by_rule50()
 		|| std::count(key_history.begin(), key_history.end(), position.key()) >= 3)
-		return (total_nodes_searched & 3) - 1;
+		return Draw;
 
 	// Update selective depth
 	sel_depth = util::max(sel_depth, plies_to_root);
@@ -214,19 +213,16 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 	if (move_list.size() == 0)
 		return position.checkers() ? mated_in(plies_to_root) : Draw; 
 
-	// "stand pat" evaluation, only when not in check
-	if (!position.checkers())
-	{
-		// Add a small random component to eval
-		const Value stand_pat = eval::evaluate(position);
+	// "stand pat" evaluation
+	const Value stand_pat = eval::evaluate(position);
 
-		if (stand_pat >= beta)
-			return beta;
+	if (stand_pat >= beta)
+		return beta;
 
-		alpha = util::max(alpha, stand_pat);
-	}
+	alpha = util::max(alpha, stand_pat);
 
 	// Move ordering
+	evaluate_move_list(position, move_list);
 
 	Bound bound = Bound::Upper;
 	Value value;
@@ -244,11 +240,17 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 		const bool is_drop = move.is_drop();
 #endif
 
-		if (!position.checkers() && (!is_capture || !is_promotion
+		// Search captures, promotions, drops only if not in check
+		if (!position.checkers())
+		{
 #if defined(CRAZYHOUSE)
-			|| !is_drop
+			if (!is_capture && !is_promotion && !is_drop)
+				continue;
+#else
+			if (!is_capture && !is_promotion)
+				continue;
 #endif
-			)) continue;
+		}
 
 		// Make a copy, apply the move, store new key in key stack, and increment nodes counter
 		Position next_position {position};
@@ -423,8 +425,20 @@ void MainThread::think()
  */
 void MainThread::check_time_fast()
 {
+	const Colour us = root_position.side_to_move();
+	const milliseconds elapsed = total_search_time();
+	const milliseconds our_time = limits.tc.time(us);
+
+	// Check movetime
 	if (limits.tc.movetime != limits.tc.movetime.zero() &&
-		total_search_time() >= (limits.tc.movetime - Overhead))
+		elapsed >= (limits.tc.movetime - Overhead))
+	{
+		times_up = true;
+		stop_thinking();
+	}
+
+	// Check wtime/btime
+	if (our_time != our_time.zero() && elapsed > (our_time - Overhead) / 10)
 	{
 		times_up = true;
 		stop_thinking();
@@ -436,13 +450,7 @@ void MainThread::check_time_fast()
  */
 void MainThread::check_time_slow()
 {
-	const milliseconds our_time = limits.tc.time(root_position.side_to_move());
-
-	if (our_time != our_time.zero() && total_search_time() >= (our_time / 10 - Overhead))
-	{
-		times_up = true;
-		stop_thinking();
-	}
+	check_time_fast();
 
 	t1 = high_resolution_clock::now();
 }
