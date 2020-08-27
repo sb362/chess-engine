@@ -4,22 +4,40 @@
 
 using namespace chess;
 
+/**
+ * @brief Evaluation function
+ * 
+ * @param position 
+ * @return Value Evaluation of @param position relative to the side to move
+ */
 Value eval::evaluate(const Position &position)
 {
+	const Colour us = position.side_to_move(), them = ~us;
+
 	Value value = Draw;
 
-	// Material
-	value += PawnValue   * position.count(Colour::White, PieceType::Pawn);
-	value += KnightValue * position.count(Colour::White, PieceType::Knight);
-	value += BishopValue * position.count(Colour::White, PieceType::Bishop);
-	value += RookValue   * position.count(Colour::White, PieceType::Rook);
-	value += QueenValue  * position.count(Colour::White, PieceType::Queen);
+	// Our material
+	value += PawnValue   * position.count(us, PieceType::Pawn);
+	value += KnightValue * position.count(us, PieceType::Knight);
+	value += BishopValue * position.count(us, PieceType::Bishop);
+	value += RookValue   * position.count(us, PieceType::Rook);
+	value += QueenValue  * position.count(us, PieceType::Queen);
 
-	value -= PawnValue   * position.count(Colour::Black, PieceType::Pawn);
-	value -= KnightValue * position.count(Colour::Black, PieceType::Knight);
-	value -= BishopValue * position.count(Colour::Black, PieceType::Bishop);
-	value -= RookValue   * position.count(Colour::Black, PieceType::Rook);
-	value -= QueenValue  * position.count(Colour::Black, PieceType::Queen);
+	// Their material
+	value -= PawnValue   * position.count(them, PieceType::Pawn);
+	value -= KnightValue * position.count(them, PieceType::Knight);
+	value -= BishopValue * position.count(them, PieceType::Bishop);
+	value -= RookValue   * position.count(them, PieceType::Rook);
+	value -= QueenValue  * position.count(them, PieceType::Queen);
 
-	return position.side_to_move() == Colour::White ? value : -value;
+	//if (!position.checkers())
+	//{
+		// Our mobility
+	//	value += (OurMobilityA * approx_mobility(position, us)) / OurMobilityB;
+
+		// Their mobility
+	//	value -= (TheirMobilityA * approx_mobility(position, them)) / TheirMobilityB;
+	//}
+
+	return value;
 }

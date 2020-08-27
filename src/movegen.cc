@@ -318,22 +318,21 @@ unsigned approx_mobility(const Position &position)
 
 	unsigned count = 0;
 
-	const Square ksq = position.king_square(Us);
+	constexpr Rank Rank3 = Us == Colour::White ? Rank::Three : Rank::Six;
+	constexpr Rank Rank7 = Us == Colour::White ? Rank::Seven : Rank::Two;
+	constexpr Direction Up = pawn_push(Us);
+	constexpr Direction UpWest = Up + West, UpEast = Up + East;
+
 	const Bitboard pinned = position.pinned();
 	const Bitboard enemy = position.occupied(~Us);
 	const Bitboard occ = position.occupied();
+	
+	const Bitboard enemy_pawns = position.occupied(~Us, PieceType::Pawn);
+	const Bitboard enemy_pawn_attacks = shift_ex<UpWest, UpEast>(enemy_pawns);
 
 	Bitboard targets = ~position.occupied(Us);
 
-	// King moves
-	Bitboard attacks = attacks_from<PieceType::King>(ksq) & targets;
-	while (attacks)
-	{
-		const Square to = static_cast<Square>(util::lsb_64(attacks));
-		count += (position.attackers_to(to, occ ^ ksq) & enemy) == 0;
-		attacks &= (attacks - 1);
-	}
-
+	// Crazyhouse drops
 #if defined(CRAZYHOUSE)
 	if (position.is_crazyhouse())
 	{
@@ -350,15 +349,13 @@ unsigned approx_mobility(const Position &position)
 	}
 #endif
 
-	constexpr Rank Rank3 = Us == Colour::White ? Rank::Three : Rank::Six;
-	constexpr Rank Rank7 = Us == Colour::White ? Rank::Seven : Rank::Two;
-	constexpr Direction Up = pawn_push(Us);
-	constexpr Direction UpWest = Up + West, UpEast = Up + East;
+	// Knight, bishop, rook, queen mobility
+	count += approx_mobility<PieceType::Knight>(position, Us, targets & ~enemy_pawn_attacks);
+	count += approx_mobility<PieceType::Bishop>(position, Us, targets & ~enemy_pawn_attacks);
+	count += approx_mobility<PieceType::Rook>  (position, Us, targets & ~enemy_pawn_attacks);
+	count += approx_mobility<PieceType::Queen> (position, Us, targets & ~enemy_pawn_attacks);
 
-	count += approx_mobility<PieceType::Knight>(position, Us, targets);
-	count += approx_mobility<PieceType::Bishop>(position, Us, targets);
-	count += approx_mobility<PieceType::Rook>  (position, Us, targets);
-	count += approx_mobility<PieceType::Queen> (position, Us, targets);
+	// Pawn mobility
 
 	const Bitboard pawns = position.occupied(Us, PieceType::Pawn) & ~pinned;
 	const Bitboard pawns_on_7 = pawns & Rank7, pawns_not_on_7 = pawns & ~pawns_on_7;
@@ -377,6 +374,15 @@ unsigned approx_mobility(const Position &position)
 	return count;
 }
 
+/**
+ * @brief Calculates approximate mobility.
+ * Ignores pinned pieces and king mobility. For knights, bishops, rooks, and queens,
+ * squares attacked by the opponent's pawns are excluded.
+ * 
+ * @param position 
+ * @param us 
+ * @return unsigned 
+ */
 unsigned chess::approx_mobility(const Position &position, const Colour us)
 {
 	return us == Colour::White ? ::approx_mobility<Colour::White>(position)
