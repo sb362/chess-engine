@@ -20,8 +20,8 @@ namespace chess::eval
 		return values[util::underlying_value(piece_type)];
 	}
 
-	constexpr Value OurMobilityA   = 1, OurMobilityB   = 10;
-	constexpr Value TheirMobilityA = 1, TheirMobilityB = 10;
+	constexpr Value OurMobilityA   = 1, OurMobilityB   = 15;
+	constexpr Value TheirMobilityA = 1, TheirMobilityB = 20;
 
 	extern Value evaluate(const Position &position);
 }

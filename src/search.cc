@@ -214,12 +214,15 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 		return position.checkers() ? mated_in(plies_to_root) : Draw; 
 
 	// "stand pat" evaluation
-	const Value stand_pat = eval::evaluate(position);
+	if (!position.checkers())
+	{
+		const Value stand_pat = eval::evaluate(position);
 
-	if (stand_pat >= beta)
-		return beta;
+		if (stand_pat >= beta)
+			return beta;
 
-	alpha = util::max(alpha, stand_pat);
+		alpha = util::max(alpha, stand_pat);
+	}
 
 	// Move ordering
 	evaluate_move_list(position, move_list);
@@ -462,8 +465,9 @@ void MainThread::post_statistics()
 	const int nps = (1000 * total_nodes) / (time.count() + 1);
 
 	uci::message(
-		"info nodes {} time {} nps {} hashfull {} hitrate {}",
-		total_nodes, time.count(), nps, tt.hashfull_approx(), tt.hit_rate()
+		"info nodes {} time {} nps {} hashfull {} hitrate {} qt {}",
+		total_nodes, time.count(), nps, tt.hashfull_approx(), tt.hit_rate(),
+		(100 * qnodes_searched()) / total_nodes
 	);
 }
 

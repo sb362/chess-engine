@@ -12,6 +12,8 @@ using namespace chess;
  */
 Value eval::evaluate(const Position &position)
 {
+	ASSERT(!position.checkers());
+
 	const Colour us = position.side_to_move(), them = ~us;
 
 	Value value = Draw;
@@ -30,14 +32,11 @@ Value eval::evaluate(const Position &position)
 	value -= RookValue   * position.count(them, PieceType::Rook);
 	value -= QueenValue  * position.count(them, PieceType::Queen);
 
-	//if (!position.checkers())
-	//{
-		// Our mobility
-	//	value += (OurMobilityA * approx_mobility(position, us)) / OurMobilityB;
+	// Our mobility
+	value += (OurMobilityA * approx_mobility(position, us)) / OurMobilityB;
 
-		// Their mobility
-	//	value -= (TheirMobilityA * approx_mobility(position, them)) / TheirMobilityB;
-	//}
+	// Their mobility
+	value -= (TheirMobilityA * approx_mobility(position, them)) / TheirMobilityB;
 
 	return value;
 }
