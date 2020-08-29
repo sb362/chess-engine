@@ -128,6 +128,7 @@ namespace chess
 		void reset_en_passant();
 
 		Key key() const;
+		Key pawn_key() const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -547,6 +548,14 @@ namespace chess
 	inline Key Position::key() const
 	{
 		return _key;
+	}
+
+	inline Key Position::pawn_key() const
+	{
+		Key k = 1442695040888963407;
+		k = k * 6364136223846793005 + occupied(Piece::WhitePawn);
+		k = k * 6364136223846793005 + occupied(Piece::BlackPawn);
+		return k;
 	}
 
 	inline Bitboard Position::checkers() const

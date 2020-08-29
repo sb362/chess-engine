@@ -300,4 +300,19 @@ inline Bitboard castling_path(const Square ksq, const Square kto,
 	return (line_between(ksq, kto) | line_between(rsq, rto) | rto | kto) & ~squares_bb(ksq, rsq);
 }
 
+/**
+ * @brief 
+ * 
+ * @param sq 
+ * @param extended 
+ * @return Bitboard 
+ */
+inline Bitboard king_shield(const Square sq, bool extended = true)
+{
+	Bitboard shield = attacks_from<PieceType::King>(sq);
+	shield |= extended * shift_ex<North, East, South, West>(shield);
+
+	return shield;
+}
+
 }

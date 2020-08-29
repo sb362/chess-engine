@@ -63,6 +63,4 @@ namespace chess
 
 		MoveWithValue select();
 	};
-
-	extern unsigned approx_mobility(const Position &position, const Colour us);
 }

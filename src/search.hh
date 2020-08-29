@@ -3,6 +3,7 @@
 #include "heuristics.hh"
 #include "movegen.hh"
 #include "position.hh"
+#include "pawns.hh"
 #include "types.hh"
 #include "uci.hh"
 
@@ -97,6 +98,8 @@ namespace chess::search
 	private:
 		Depth id_depth, sel_depth;
 		std::atomic<Nodes> nodes, qnodes;
+
+		std::unique_ptr<pawns::Cache> pawn_cache;
 
 		Heuristics heuristics;
 

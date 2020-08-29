@@ -12,6 +12,6 @@ namespace chess
 		if (is_mate(value))
 			value = relative_mate_value(value, plies_to_root);
 
-		write(key, {depth, move, value, bound, current_epoch()}, util::always_replace);
+		assign(key, {depth, move, value, bound, current_epoch()}, util::always_replace);
 	}
 }

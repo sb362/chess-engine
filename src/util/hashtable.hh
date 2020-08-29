@@ -1,10 +1,82 @@
 #pragma once
 
-#include <array>
+#include <cstdint>
+
+#include "array.hh"
 
 namespace util
 {
 
+/**
+ * @brief Fixed-size basic hash table
+ * 
+ * @tparam K Key/hash type
+ * @tparam E Entry type
+ * @tparam S Size (number of entries)
+ */
+template <typename K, typename E, std::size_t S>
+class FixedSizeHashTable
+{
+public:
+	using Key = K;
+	using Entry = E;
+	static constexpr std::size_t Size = S; 
+
+	struct EntryWithKey
+	{
+		Key key = 0;
+		Entry entry {};
+	};
+
+private:
+	util::array_t<EntryWithKey, S> entries;
+	std::size_t hits, misses;
+
+public:
+	FixedSizeHashTable()
+		: entries(), hits(0), misses(0)
+	{
+	}
+
+	std::size_t total_hits() const { return hits; }
+	std::size_t total_misses() const { return misses; }
+	std::size_t total_probes() const { return hits + misses; }
+	unsigned hit_rate() const { return (total_hits() * 100) / total_probes(); }
+
+	std::size_t index(const Key key) const { return key % Size; }
+
+	const Entry *probe(const Key key)
+	{
+		const std::size_t i = index(key);
+		const Entry *entry = entries[i].key == key ? &entries[i].entry : nullptr;
+
+		hits += entry != nullptr;
+		misses += entry == nullptr;
+
+		return entry;
+	}
+
+	void assign(const Key key, const Entry &entry)
+	{
+		const std::size_t i = index(key);
+
+		entries[i].key = key;
+		entries[i].entry = entry;
+	}
+
+	void clear()
+	{
+		entries.clear();
+		hits = misses = 0;
+	}
+};
+
+/**
+ * @brief Resizable hash table, with aging + detailed statistics
+ * 
+ * @tparam K Key/hash type
+ * @tparam E Entry
+ */
 template <typename K, typename E>
 class HashTable
 {
@@ -15,7 +87,7 @@ public:
 	struct EntryWithKey
 	{
 		Key key = 0;
-		Entry entry = {};
+		Entry entry {};
 	};
 
 	using Compare = bool (*)(const Entry &, const Entry &);
@@ -42,10 +114,7 @@ public:
 	std::size_t total_failed_writes() const { return failed_writes; }
 	std::size_t total_writes() const { return successful_writes + failed_writes; }
 
-	unsigned hit_rate() const
-	{
-		return (total_hits() * 100) / total_probes();
-	}
+	unsigned hit_rate() const { return (total_hits() * 100) / total_probes(); }
 
 	std::size_t entry_count() const { return nentries; }
 
@@ -105,7 +174,6 @@ public:
 	void clear()
 	{
 		std::memset(entries, 0, size_in_bytes());
-
 		reset_statistics();
 	}
 
@@ -125,7 +193,7 @@ public:
 		return entry;
 	}
 
-	bool write(const Key key, const Entry &entry, Compare compare)
+	bool assign(const Key key, const Entry &entry, Compare compare)
 	{
 		const std::size_t i = index(key);
 		EntryWithKey *entry_with_key = &entries[i];

@@ -51,7 +51,7 @@ namespace chess
 		/**
 		* @brief Default size of the transposition table in bytes
 		*/
-		static constexpr unsigned DefaultSize = 8 * 1024 * 1024;
+		static constexpr unsigned DefaultSize = 12 * 1024 * 1024;
 
 		void save(Key key, Depth depth, Depth plies_to_root, Value value, Bound bound, Move move);
 	};

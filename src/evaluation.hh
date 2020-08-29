@@ -1,9 +1,14 @@
 #pragma once
 
 #include "position.hh"
+#include "pawns.hh"
 
 namespace chess::eval
 {
+	//
+	// Material values
+	//
+
 	constexpr Value PawnValue   = 100;
 	constexpr Value KnightValue = 300;
 	constexpr Value BishopValue = 325;
@@ -20,8 +25,16 @@ namespace chess::eval
 		return values[util::underlying_value(piece_type)];
 	}
 
-	constexpr Value OurMobilityA   = 1, OurMobilityB   = 15;
-	constexpr Value TheirMobilityA = 1, TheirMobilityB = 20;
+	extern Value evaluate(const Position &position, const pawns::Entry *pawn_entry, const bool do_trace = false);
 
-	extern Value evaluate(const Position &position);
+	inline Value evaluate(const Position &position, pawns::Cache *pawn_cache, const bool do_trace = false)
+	{
+		return evaluate(position, pawn_cache->probe_or_assign(position), do_trace);
+	}
+
+	inline Value evaluate(const Position &position, const bool do_trace = false)
+	{
+		pawns::Entry pawn_entry {position};
+		return evaluate(position, &pawn_entry, do_trace);
+	}
 }

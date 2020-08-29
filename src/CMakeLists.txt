@@ -7,7 +7,7 @@ add_library (chess bitboard.cc bitboard.hh kogge-impl.hh magic.cc magic.hh
 
 add_library (engine perft.cc perft.hh ucioption.cc ucioption.hh uci.cc uci.hh
 					moveorder.cc moveorder.hh search.cc search.hh heuristics.hh
-					tt.cc tt.hh evaluation.cc evaluation.hh
+					tt.cc tt.hh pawns.cc pawns.hh evaluation.cc evaluation.hh
 					threading/thread.cc threading/thread.hh)
 
 add_executable (main main.cc)

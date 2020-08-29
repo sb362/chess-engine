@@ -1,3 +1,4 @@
+#include "evaluation.hh"
 #include "search.hh"
 #include "tt.hh"
 #include "uci.hh"
@@ -119,6 +120,9 @@ int uci::main(int, char *[])
 	// Main search thread
 	search::MainThread main_thread;
 
+	// Root position
+	Position root_position;
+
 	options.listen("Threads",
 		[&] (const Option *option, const std::string &old_threads, const std::string &new_threads)
 		{
@@ -190,13 +194,12 @@ int uci::main(int, char *[])
 		else if (cmd == "position")
 		{	
 			bool bad = false;
-			Position position;
 			search::KeyHistory key_history;
 
 			iss >> token;
 			if (token == "startpos")
 			{
-				position.set_fen(fens::Startpos);
+				root_position.set_fen(fens::Startpos);
 				iss >> token; // 'moves'
 			}
 			else if (token == "fen")
@@ -207,7 +210,7 @@ int uci::main(int, char *[])
 				while (iss >> token && token != "moves")
 					fen += ' ' + token;
 				
-				position.set_fen(fen);
+				root_position.set_fen(fen);
 			}
 			else
 			{
@@ -215,7 +218,7 @@ int uci::main(int, char *[])
 				message("info string Unrecognised parameter '{}'", token);
 			}
 
-			key_history.push_back(position.key());
+			key_history.push_back(root_position.key());
 
 			while (!bad && iss >> token)
 			{
@@ -228,15 +231,15 @@ int uci::main(int, char *[])
 					continue;
 				}
 
-				position.do_move(move);
-				key_history.push_back(position.key());
+				root_position.do_move(move);
+				key_history.push_back(root_position.key());
 			}
 
 			if (!bad)
 			{
 				main_thread.stop_thinking();
 				main_thread.wait_until_idle();
-				main_thread.initialise(position, key_history);
+				main_thread.initialise(root_position, key_history);
 			}
 		}
 		else if (cmd == "go")
@@ -305,8 +308,11 @@ int uci::main(int, char *[])
 		}
 		else if (cmd == "ponderhit")
 		{
-
 		}
+		else if (cmd == "show")
+			fmt::print("{}\n", root_position.to_string());
+		else if (cmd == "eval")
+			eval::evaluate(root_position, true);
 		else if (cmd == "stop")
 			main_thread.stop_thinking();
 		else if (cmd == "quit")

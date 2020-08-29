@@ -9,6 +9,7 @@ using namespace chess::search;
 Thread::Thread(std::size_t id)
 	: threading::Thread(id), root_position(), limits(),
 	  id_depth(), sel_depth(), nodes(), qnodes(),
+	  pawn_cache(std::make_unique<pawns::Cache>()),
 	  heuristics(), root_pv(), root_value(-Infinite)
 {
 }
@@ -32,7 +33,7 @@ Value Thread::search(const Position &position, Value alpha, Value beta, const De
 	if (should_stop() || (limits.nodes && total_nodes_searched >= limits.nodes))
 	{
 		// If we are in check, the position is probably dangerous. Return draw value instead.
-		return position.checkers() ? Draw : eval::evaluate(position);
+		return position.checkers() ? Draw : eval::evaluate(position, pawn_cache.get());
 	}
 
 	// Zobrist key for this node
@@ -195,7 +196,7 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 	if (should_stop() || (limits.nodes && total_nodes_searched >= limits.nodes))
 	{
 		// If we are in check, the position is probably dangerous. Return draw value instead.
-		return position.checkers() ? Draw : eval::evaluate(position);
+		return position.checkers() ? Draw : eval::evaluate(position, pawn_cache.get());
 	}
 
 	// Check for draw by fifty moves / threefold repetition
@@ -216,7 +217,7 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 	// "stand pat" evaluation
 	if (!position.checkers())
 	{
-		const Value stand_pat = eval::evaluate(position);
+		const Value stand_pat = eval::evaluate(position, pawn_cache.get());
 
 		if (stand_pat >= beta)
 			return beta;
