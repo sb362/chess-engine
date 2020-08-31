@@ -326,6 +326,14 @@ void Thread::think()
 				uci::format_variation(root_pv)
 			);
 
+#if !defined(NDEBUG)
+			uci::message(
+				"info depth {:d} thread {} qt {} pawnhitrate {}",
+				id_depth, id(), (100 * qnodes) / (nodes + qnodes),
+				pawn_cache->hit_rate()
+			);
+#endif
+
 			if (is_main_thread())
 			{
 				MainThread *main_thread = static_cast<MainThread *>(this);
@@ -466,9 +474,8 @@ void MainThread::post_statistics()
 	const int nps = (1000 * total_nodes) / (time.count() + 1);
 
 	uci::message(
-		"info nodes {} time {} nps {} hashfull {} hitrate {} qt {}",
-		total_nodes, time.count(), nps, tt.hashfull_approx(), tt.hit_rate(),
-		(100 * qnodes_searched()) / total_nodes
+		"info nodes {} time {} nps {} hashfull {} hitrate {}",
+		total_nodes, time.count(), nps, tt.hashfull_approx(), tt.hit_rate()
 	);
 }
 

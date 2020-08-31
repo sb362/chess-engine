@@ -25,6 +25,28 @@ namespace chess::eval
 		return values[util::underlying_value(piece_type)];
 	}
 
+	//
+	// Mobility
+	//
+
+	constexpr Value piece_mobility_weight_a(const PieceType piece_type)
+	{
+		constexpr util::array_t<Value, PieceTypes> weights {1, 2, 2, 2, 0, 0};
+		return weights[util::underlying_value(piece_type)];
+	}
+
+	constexpr Value piece_mobility_weight_b(const PieceType piece_type)
+	{
+		constexpr util::array_t<Value, PieceTypes> weights {1, 1, 1, 1, 1, 1};
+		return weights[util::underlying_value(piece_type)];
+	}
+
+	//
+	// Misc. bonuses and penalties
+	//
+
+	constexpr Value Tempo = 29;
+
 	extern Value evaluate(const Position &position, const pawns::Entry *pawn_entry, const bool do_trace = false);
 
 	inline Value evaluate(const Position &position, pawns::Cache *pawn_cache, const bool do_trace = false)

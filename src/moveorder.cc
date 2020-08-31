@@ -50,6 +50,8 @@ void search::evaluate_move_list(const Position &position, MoveList &move_list, c
 				move.value = KillerMovesOffset;
 			else
 				move.value = QuietsOffset + heuristics.history.probe(moved_piece, move.to());
+			
+			// todo: pawn sac bonus?
 		}
 	}
 }
