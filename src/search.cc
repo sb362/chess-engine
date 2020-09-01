@@ -125,36 +125,35 @@ Value Thread::search(const Position &position, Value alpha, Value beta, const De
 
 		const bool gives_check = next_position.checkers();
 
-		// Reductions and extensions
-		Depth r = 1;
-
 		// Late move reductions
 		// http://rebel13.nl/rebel13/blog/lmr%20advanced.html
-		bool did_lmr = false;
 		if (depth >= LMRDepthLimit && move_number > LMRMoveNumber
 			&& !gives_check && !is_capture && !is_promotion)
 		{
-			++r;
+			Depth r = 2;
 
 			if (plies_to_root > 0)
 			{
+				// Reduce further if move is really late
 				r += move_number > LMRMoveNumber2;
 
 				// Reduce further if the move has a bad history
 				r += heuristics.history.probe(moved_piece, move.to()) < 0;
 			}
 
-			did_lmr = true;
-
 			r = util::clamp(r, 1, depth);
+
+			child_pv.clear();
+			value = -search(next_position, -alpha - 1, -alpha, depth - r, plies_to_root + 1, child_pv);
+
+			// Redo search with full depth and window if we reduced this node but we improved alpha
+			if (value > alpha)
+			{
+				child_pv.clear();
+				value = -search(next_position, -beta, -alpha, depth - 1, plies_to_root + 1, child_pv);
+			}
 		}
-
-		// Search this move
-		child_pv.clear();
-		value = -search(next_position, -beta, -alpha, depth - r, plies_to_root + 1, child_pv);
-
-		// Redo search with full depth if we reduced this node but we improved alpha
-		if (did_lmr && value > alpha)
+		else
 		{
 			child_pv.clear();
 			value = -search(next_position, -beta, -alpha, depth - 1, plies_to_root + 1, child_pv);
