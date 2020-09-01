@@ -31,7 +31,8 @@ namespace chess::search
 #endif
 
 	constexpr Depth LMRDepthLimit = 3;
-	constexpr Depth LMRMoveNumber = 3;
+	constexpr int LMRMoveNumber   = 3;
+	constexpr int LMRMoveNumber2  = 10; 
 
 	constexpr milliseconds Overhead = milliseconds {50};
 
