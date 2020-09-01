@@ -45,11 +45,17 @@ struct KillerHeuristic : util::array_t<Killers, MaxDepth>
 	}
 };
 
+constexpr Value MaxHistoryValue = 2000;
+
+// History heuristic derived from http://rebel13.nl/rebel13/blog/lmr%20advanced.html
 struct HistoryHeuristic : util::array_t<Value, Pieces, Squares>
 {
 	void update(const Value value, const Piece piece, const Square to)
 	{
 		(*this)[util::underlying_value(piece)][util::underlying_value(to)] += value;
+
+		if (util::abs(probe(piece, to)) >= 2000)
+			(*this)[util::underlying_value(piece)][util::underlying_value(to)] /= 2;
 	}
 
 	void clear()

@@ -123,12 +123,42 @@ Value Thread::search(const Position &position, Value alpha, Value beta, const De
 		key_history.push_back(next_position.key());
 		nodes.fetch_add(1, std::memory_order_relaxed);
 
+		const bool gives_check = next_position.checkers();
+
 		// Reductions and extensions
 		Depth r = 1;
-		
+
+		// Late move reductions
+		// http://rebel13.nl/rebel13/blog/lmr%20advanced.html
+		bool did_lmr = false;
+		if (depth >= LMRDepthLimit && move_number > LMRMoveNumber
+			&& !gives_check && !is_capture && !is_promotion)
+		{
+			++r;
+
+			if (plies_to_root > 0)
+			{
+				r += move_number > LMRMoveNumber2;
+
+				// Reduce further if the move has a bad history
+				r += heuristics.history.probe(moved_piece, move.to()) < 0;
+			}
+
+			did_lmr = true;
+
+			r = util::clamp(r, 1, depth);
+		}
+
 		// Search this move
 		child_pv.clear();
 		value = -search(next_position, -beta, -alpha, depth - r, plies_to_root + 1, child_pv);
+
+		// Redo search with full depth if we reduced this node but we improved alpha
+		if (did_lmr && value > alpha)
+		{
+			child_pv.clear();
+			value = -search(next_position, -beta, -alpha, depth - 1, plies_to_root + 1, child_pv);
+		}
 
 		// Undo
 		key_history.pop_back();
@@ -146,6 +176,13 @@ Value Thread::search(const Position &position, Value alpha, Value beta, const De
 			pv.push_back(best_move);
 			pv.insert(pv.end(), child_pv.begin(), child_pv.end());
 
+			// Update history heuristic
+			if (plies_to_root <= 8 && !is_capture && !is_promotion)
+			{
+				// Update history heuristic
+				heuristics.history.update(depth * depth, moved_piece, move.to());
+			}
+
 			// Check for beta cutoff
 			if (alpha >= beta)
 			{
@@ -153,16 +190,22 @@ Value Thread::search(const Position &position, Value alpha, Value beta, const De
 
 				// Update heuristics for quiet moves
 				if (!is_capture && !is_promotion)
-				{
-					heuristics.history.update(depth * depth, moved_piece, move.to());
 					heuristics.killer.update(depth, move);
-				}
 
 				// Save to transposition table
 				tt.save(key, depth, plies_to_root, beta, bound, best_move);
 
 				// Fail-hard beta-cutoff
 				return beta;
+			}
+		}
+		else
+		{
+			// Update history heuristic
+			if (plies_to_root <= 8 && !is_capture && !is_promotion)
+			{
+				// Update history heuristic
+				heuristics.history.update(-depth, moved_piece, move.to());
 			}
 		}
 	}
