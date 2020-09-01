@@ -1,4 +1,5 @@
 #include "thread.hh"
+#include <atomic>
 
 using namespace threading;
 
@@ -37,7 +38,7 @@ bool Thread::is_idle()
 
 bool Thread::should_stop()
 {
-	return stop;
+	return stop.load(std::memory_order_relaxed);
 }
 
 void Thread::wait_until_idle()

@@ -301,18 +301,39 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
  */
 void Thread::think()
 {
+	clear();
+
+	Value alpha = -Infinite, beta = Infinite;
 	Value value = -Infinite;
 	MoveSequence pv;
 
-	clear();
-
-	for (id_depth = 1; (  ((!limits.depth || id_depth <= limits.depth)
-						|| limits.infinite) && !should_stop()); ++id_depth)
+	// Iterative deepening loop
+	for (id_depth = 1; (!limits.depth || id_depth <= limits.depth) || limits.infinite; ++id_depth)
 	{
 		sel_depth = 0;
 
-		pv.clear();
-		value = search(root_position, -Infinite, Infinite, id_depth, 0, pv);
+		if (id_depth > 1)
+		{
+			alpha = util::max(value - AspirationWindowHalfWidth, -Infinite);
+			beta  = util::min(value + AspirationWindowHalfWidth,  Infinite);
+		}
+
+		// Aspiration loop
+		while (!should_stop())
+		{
+
+			pv.clear();
+			value = search(root_position, alpha, beta, id_depth, 0, pv);
+
+			// Fail-low
+			if (value <= alpha)
+				alpha = util::max(value - AspirationWindowHalfWidth, -Infinite);
+			// Fail-high
+			else if (value >= beta)
+				beta = util::min(value + AspirationWindowHalfWidth, Infinite);
+			else
+				break;
+		}
 
 		// If search was stopped prematurely, don't update the root PV / value / depth.
 		if (!should_stop())

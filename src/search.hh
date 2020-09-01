@@ -35,6 +35,9 @@ namespace chess::search
 
 	constexpr milliseconds Overhead = milliseconds {50};
 
+	// Half of the aspiration window size
+	constexpr Value AspirationWindowHalfWidth = 50;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
