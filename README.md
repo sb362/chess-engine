@@ -22,6 +22,7 @@ Requires a UCI-compatible chess interface, such as Scid or CuteChess, to be used
 # Building
 ```
 git clone --recurse-submodules https://github.com/sb362/chess-engine.git
+cd chess-engine
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make
