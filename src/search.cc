@@ -363,7 +363,6 @@ void Thread::think()
 		// Aspiration loop
 		while (!should_stop())
 		{
-
 			pv.clear();
 			value = search(root_position, alpha, beta, id_depth, 0, pv);
 

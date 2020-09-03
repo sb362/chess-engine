@@ -23,9 +23,9 @@ struct MagicInfo
 #endif
 };
 
-template <PieceType T> static constexpr std::size_t AttackTableSize = 0;
-template <> static constexpr std::size_t AttackTableSize<PieceType::Bishop> = 5248;
-template <> static constexpr std::size_t AttackTableSize<PieceType::Rook>   = 102400;
+template <PieceType T> constexpr std::size_t AttackTableSize = 0;
+template <> constexpr std::size_t AttackTableSize<PieceType::Bishop> = 5248;
+template <> constexpr std::size_t AttackTableSize<PieceType::Rook>   = 102400;
 
 // Holds magic info for each square + attack database
 template <PieceType T> class MagicTable

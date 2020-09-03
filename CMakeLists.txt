@@ -8,7 +8,7 @@ set (CMAKE_CXX_EXTENSIONS OFF)
 if (MSVC)
 	set (SHARED_FLAGS /W3 /WX)
 else ()
-	set (SHARED_FLAGS -Wall -Wextra -Wshadow -Wdouble-promotion -Wfloat-equal
+	set (SHARED_FLAGS -Wall -Wextra -Wdouble-promotion -Wfloat-equal
 					  -Wcast-qual -Wcast-align -Wold-style-cast
 					  -m64 -msse4 -mpopcnt)
 endif ()
