@@ -169,7 +169,7 @@ inline Bitboard attacks_from<PieceType::Queen>(const Square sq)
  * @param occ Bitboard of all pieces
  * @return Bitboard of all attacks from a piece given type placed on the given square
  */
-template <PieceType T> Bitboard attacks_from(const Square sq, const Bitboard occ)
+template <PieceType T> Bitboard attacks_from(const Square sq, const Bitboard)
 {
 	return attacks_from<T>(sq);
 }

@@ -30,5 +30,7 @@ endif ()
 #	message (WARNING "PEXT or PEXT/PDEP attack generation specified, but no BMI2 support.")
 #endif ()
 
+find_package (Threads REQUIRED)
+
 add_subdirectory (src)
 add_subdirectory (tests)

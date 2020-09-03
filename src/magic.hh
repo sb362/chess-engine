@@ -23,10 +23,6 @@ struct MagicInfo
 #endif
 };
 
-template <PieceType T> constexpr std::size_t AttackTableSize = 0;
-template <> constexpr std::size_t AttackTableSize<PieceType::Bishop> = 5248;
-template <> constexpr std::size_t AttackTableSize<PieceType::Rook>   = 102400;
-
 // Holds magic info for each square + attack database
 template <PieceType T> class MagicTable
 {
@@ -76,9 +72,9 @@ private:
 	util::array_t<MagicInfo, Squares> _info;
 
 #if defined(USE_PDEP)
-	util::array_t<std::uint16_t, AttackTableSize<T>> _attacks;
+	util::array_t<std::uint16_t, T == PieceType::Rook ? 102400 : 5248> _attacks;
 #else
-	util::array_t<Bitboard,      AttackTableSize<T>> _attacks;
+	util::array_t<Bitboard,      T == PieceType::Rook ? 102400 : 5248> _attacks;
 #endif
 };
 

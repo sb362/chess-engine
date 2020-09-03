@@ -17,5 +17,5 @@ target_compile_options (engine PRIVATE ${SHARED_FLAGS})
 target_compile_options (main PRIVATE ${SHARED_FLAGS})
 
 target_link_libraries (chess PUBLIC fmt::fmt)
-target_link_libraries (engine PUBLIC chess)
+target_link_libraries (engine PUBLIC chess Threads::Threads)
 target_link_libraries (main engine)
