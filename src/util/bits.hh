@@ -12,8 +12,8 @@
  //
 
 // #define USE_BMI2
-#define USE_LSB
-#define USE_POPCNT
+// #define USE_LSB
+// #define USE_POPCNT
 
 #if defined(_MSC_VER)
 #	pragma warning(disable: 4146) // unary minus operator applied to unsigned type

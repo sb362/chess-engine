@@ -1,5 +1,6 @@
 #include "position.hh"
 
+#include <string>
 #include <sstream>
 
 using namespace chess;
@@ -65,6 +66,9 @@ int Position::set_fen(const std::string &fen)
 	bool is_in_hand = false;
 	bool lichess_style = false;
 	bool next_piece_is_promoted = false;
+#if !defined(CRAZYHOUSE)
+	(void)is_in_hand, (void)lichess_style, (void)next_piece_is_promoted;
+#endif
 
 	for (char c : token)
 	{

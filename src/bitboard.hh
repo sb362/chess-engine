@@ -11,7 +11,7 @@
 //
 
 // #define USE_KOGGE_STONE
-#define USE_FANCY
+// #define USE_FANCY
 // #define USE_PEXT
 // #define USE_PDEP
 
