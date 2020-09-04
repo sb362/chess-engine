@@ -23,7 +23,7 @@ Requires a UCI-compatible chess interface, such as Scid or CuteChess, to be used
 ```
 git clone --recurse-submodules https://github.com/sb362/chess-engine.git
 cd chess-engine
-meson build
+meson build --buildtype=release
 ninja -C build
 ```
 

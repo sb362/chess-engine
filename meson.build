@@ -1,8 +1,3 @@
-
-# -Wall -Wextra -Wdouble-promotion -Wfloat-equal
-# -Wcast-qual -Wcast-align -Wold-style-cast
-# -m64 -msse4 -mpopcnt
-
 project(
 	'chess-engine',
 	'cpp',
@@ -10,7 +5,8 @@ project(
 		'cpp_std=c++17',
 		'warning_level=3',
 		'werror=true',
-		'default_library=static'
+		'default_library=static',
+		'b_lto=true'
 	],
 	version : '1.0'
 )
