@@ -2,7 +2,7 @@
 UCI-compatible chess engine.
 Supports standard chess (tested) and crazyhouse (not fully tested).
 
-### Search
+### [Search](src/search.cc)
 - Copy-make
 - Iterative deepening
 - Transposition table
@@ -11,7 +11,7 @@ Supports standard chess (tested) and crazyhouse (not fully tested).
 - History + killer heuristics
 - Multithreading using Lazy SMP (untested)
 
-### Evaluation
+### [Evaluation](src/evaluation.cc)
 - Material counting
 - Mobility
 - Pawn structure considering doubled, isolated, backwards, and passed pawns
