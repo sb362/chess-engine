@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+#define CATCH_CONFIG_RUNNER
 #include "catch2/catch.hpp"
 
 #include "perft.hh"
@@ -127,7 +128,6 @@ TEST_CASE("Perft", "[perft]")
 	{
 		Position position {data.fen};
 
-		// Copy-make
 		time_point t0 = clock::now();
 		Nodes nodes = perft(position, data.depth);
 		time_point t1 = clock::now();
@@ -143,3 +143,16 @@ TEST_CASE("Perft", "[perft]")
 	}
 }
 
+int main(int argc, char *argv[])
+{
+	bitboards::init();
+	magics::init();
+
+	Catch::Session session;
+
+	int status = session.applyCommandLine(argc, argv);
+	if (status == 0)
+		status = session.run();
+
+	return status;
+}

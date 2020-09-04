@@ -1,0 +1,5 @@
+option('use_lsb',    type : 'boolean', value : true, description : 'Use LSB/MSB intrinsics')
+option('use_popcnt', type : 'boolean', value : true, description : 'Use popcnt intrinsics')
+option('use_bmi2',   type : 'boolean', value : true, description : 'Use BMI2 intrinsics')
+
+option('build_tests', type : 'bool', value : false, description : 'Build tests')
