@@ -15,13 +15,70 @@ project(
 ## Configuration                                                           ##
 #############################################################################
 
+attack_gen = get_option('attack_gen')
+
+use_lsb = get_option('use_lsb')
+use_popcnt = get_option('use_popcnt')
+use_bmi2 = get_option('use_bmi2')
+
+build_tests = get_option('build_tests')
+
 cc = meson.get_compiler('cpp')
 
+# Check for 64-bit architecture
+if cc.sizeof('void *') != 8
+	error('Only 64-bit build is supported')
+endif
+
+# Disable dumb warnings
 if cc.get_id() == 'gcc'
 	add_project_arguments('-Wno-class-memaccess', language : 'cpp')
 endif
 
-add_project_arguments('-DUSE_' + get_option('attack_gen').to_upper(), language : 'cpp')
+# Intrinsics
+if use_lsb
+	add_project_arguments('-DUSE_LSB', language : 'cpp')
+endif
+
+if use_popcnt
+	add_project_arguments('-DUSE_POPCNT', language : 'cpp')
+
+	if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
+		add_project_arguments('-mpopcnt', language : 'cpp')
+	endif
+endif
+
+if use_bmi2
+	add_project_arguments('-DUSE_BMI2', language : 'cpp')
+
+	if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
+		add_project_arguments('-mbmi2', language : 'cpp')
+	endif
+endif
+
+# Other
+add_project_arguments('-DUSE_' + attack_gen.to_upper(), language : 'cpp')
+
+if (attack_gen == 'pext' or attack_gen == 'pdep') and not use_bmi2
+	warning('PEXT or PEXT+PDEP attack generation selected, but BMI2 not enabled.')
+endif
+
+summary(
+	{
+		'POPCNT' : get_option('use_lsb'),
+		'LSB/MSB' : get_option('use_popcnt'),
+		'BMI2' : get_option('use_bmi2')	
+	},
+	section : 'Intrinsics'
+)
+
+summary(
+	{
+		'Attack generation' : get_option('attack_gen'),
+		'Build tests' : get_option('build_tests')
+	},
+	section : 'Other'
+)
 
 #############################################################################
 ## Subprojects / dependencies                                              ##
@@ -30,8 +87,10 @@ add_project_arguments('-DUSE_' + get_option('attack_gen').to_upper(), language :
 fmt_proj = subproject('fmt')
 fmt_dep = fmt_proj.get_variable('fmt_dep')
 
-catch2_proj = subproject('Catch2')
-catch2_dep = catch2_proj.get_variable('catch2_dep')
+if build_tests
+	catch2_proj = subproject('Catch2')
+	catch2_dep = catch2_proj.get_variable('catch2_dep')
+endif
 
 threads_dep = dependency('threads')
 
@@ -127,10 +186,12 @@ engine_exe = executable(
 	dependencies : [fmt_dep, engine_dep]
 )
 
-perft_test_exe = executable(
-	'tests',
-	sources : ['src/perft.test.cc'],
-	dependencies : [fmt_dep, catch2_dep, engine_dep]
-)
+if build_tests
+	perft_test_exe = executable(
+		'tests',
+		sources : ['src/perft.test.cc'],
+		dependencies : [fmt_dep, catch2_dep, engine_dep]
+	)
 
-test('perft', perft_test_exe)
+	test('perft', perft_test_exe)
+endif

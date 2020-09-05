@@ -1,6 +1,6 @@
 option('use_lsb',    type : 'boolean', value : true, description : 'Use LSB/MSB intrinsics')
 option('use_popcnt', type : 'boolean', value : true, description : 'Use POPCNT intrinsics')
-option('use_bmi2',   type : 'boolean', value : true, description : 'Use BMI2 intrinsics (requires CPU with BMI2 support)')
+option('use_bmi2',   type : 'boolean', value : false, description : 'Use BMI2 intrinsics (requires CPU with BMI2 support)')
 
 option('build_tests', type : 'boolean', value : false, description : 'Build tests')
 
@@ -11,3 +11,5 @@ option(
 	value : 'fancy',
 	description : 'Sliding piece attack generation. pext/pdep is best, but requires use_bmi2.'
 )
+
+option('crazyhouse', type : 'boolean', value : 'false', description : 'Enable crazyhouse support')
