@@ -17,10 +17,9 @@ addons:
     - clang-9
     - gcc-9
     - g++-9
-    - meson
-    - ninja-build
 
 install:
+  - pip3 install meson ninja
   - if [ "$CXX" = "g++" ]; then export CXX="g++-9"; fi
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-9"; fi
   - ${CXX} -v
@@ -29,4 +28,4 @@ script:
   - meson build -Dbuild_tests=true --buildtype=release
   - cd build
   - ninja
-  - meson test
+  - ./tests
