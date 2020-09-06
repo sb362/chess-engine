@@ -21,7 +21,7 @@ addons:
     - ninja-build
 
 install:
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-9" fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-9"; fi
   - ${CXX} -v
 
 script:
