@@ -20,6 +20,10 @@ addons:
     - meson
     - ninja-build
 
+install:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-9" fi
+  - ${CXX} -v
+
 script:
   - meson build -Dbuild_tests=true --buildtype=release
   - meson compile -C build
