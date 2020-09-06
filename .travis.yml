@@ -22,6 +22,7 @@ addons:
 
 install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-9"; fi
+  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-9"; fi
   - ${CXX} -v
 
 script:
