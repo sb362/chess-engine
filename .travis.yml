@@ -17,6 +17,8 @@ addons:
     - clang-9
     - gcc-9
     - g++-9
+    - python3
+    - python3-pip
 
 install:
   - python3 -m pip install meson ninja
