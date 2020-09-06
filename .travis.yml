@@ -27,5 +27,6 @@ install:
 
 script:
   - meson build -Dbuild_tests=true --buildtype=release
-  - meson compile -C build
-  - meson test -C build
+  - cd build
+  - ninja
+  - meson test
