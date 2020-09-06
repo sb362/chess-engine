@@ -79,7 +79,7 @@ Move uci::parse_move(std::string_view s)
 		return {}; // Null/invalid move
 
 #if defined(CRAZYHOUSE)
-	if (const std::size_t pos = PieceTypeCharsUpper.find(s[0]); pos != std::string::npos);
+	if (const std::size_t pos = PieceTypeCharsUpper.find(s[0]); pos != std::string::npos)
 	{
 		const PieceType drop = static_cast<PieceType>(pos);
 		const Square to = parse_square(s.substr(2, 2));
@@ -114,7 +114,8 @@ int uci::main(int, char *[])
 							1, 16384, "Transposition table size in MiB");
 	
 #if defined(CRAZYHOUSE)
-	options.add<ComboOption>("UCI_Variant", "standard", {"standard", "crazyhouse"});
+	std::unordered_set<std::string> variants {"standard", "crazyhouse"};
+	options.add<ComboOption>("UCI_Variant", "standard", variants);
 #endif
 
 	// Main search thread

@@ -22,8 +22,8 @@ namespace util
 	inline int assertion_failed(std::string_view func, std::string_view file,
 								std::size_t line, std::string_view cond)
 	{
-		fmt::print(stderr, "{}:{} {}: expected '{}'", file, line, func, cond);
-		std::exit(EXIT_FAILURE);
+		fmt::print(stderr, "{}:{} {}: expected '{}'\n", file, line, func, cond);
+		std::terminate();
 		return 0;
 	}
 }

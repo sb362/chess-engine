@@ -50,17 +50,17 @@ public:
 #if defined(USE_FANCY)
 		return ((occ & m.mask) * m.magic) >> m.shift;
 #elif defined(USE_PEXT)
-		return pext_64(occ, m.mask);
+		return util::pext_64(occ, m.mask);
 #elif defined(USE_PDEP)
-		return pext_64(occ, m.mask);
+		return util::pext_64(occ, m.mask);
 #endif
 		return 0;
 	}
 
 	Bitboard attacks(const Square sq, const Bitboard occ) const
 	{
-#if defined(CHESS_CONFIG_BITBOARDS_PDEP)
-		return pdep(info(sq).attacks[index(sq, occ)], info(sq).postmask);
+#if defined(USE_PDEP)
+		return util::pdep_64(info(sq).attacks[index(sq, occ)], info(sq).postmask);
 #else
 		return info(sq).attacks[index(sq, occ)];
 #endif

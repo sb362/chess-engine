@@ -67,7 +67,7 @@ Value evaluate_mobility(const Position &position, const Colour us)
 
 		// Calculate mobility
 		const Bitboard attacks = attacks_from<T>(sq, occ) & targets;
-			value += (piece_mobility_weight_a(T) * util::popcount_64(attacks & targets))
+			value += (piece_mobility_weight_a(T) * util::popcount_64(attacks))
 					/ piece_mobility_weight_b(T);
 	}
 

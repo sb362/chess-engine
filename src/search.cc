@@ -270,7 +270,6 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 	// Move ordering
 	evaluate_move_list(position, move_list);
 
-	Bound bound = Bound::Upper;
 	Value value;
 	Move best_move;
 	MoveSequence child_pv;
@@ -315,7 +314,6 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 		{
 			alpha = value;
 			best_move = move;
-			bound = Bound::Exact;
 
 			// Update our principal variation by pushing the best move
 			// for this node and copying the child PV onto the end
@@ -326,8 +324,6 @@ Value Thread::qsearch(const Position &position, Value alpha, Value beta,
 			// Check for beta cutoff
 			if (alpha >= beta)
 			{
-				bound = Bound::Lower;
-
 				// Fail-hard beta-cutoff
 				return beta;
 			}

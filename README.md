@@ -23,12 +23,12 @@ Requires a UCI-compatible chess interface, such as Scid or CuteChess, to be used
 ```
 git clone --recurse-submodules https://github.com/sb362/chess-engine.git
 cd chess-engine
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make
+meson build --buildtype=release
+ninja -C build
 ```
 
 # Dependencies
 - A C++17 capable compiler
+- Meson, Ninja (for building)
 - [{fmt}](https://github.com/fmtlib/fmt) (submodule)
 - [Catch2](https://github.com/catchorg/Catch2) (submodule, used for testing)

@@ -1,5 +1,6 @@
 #include "position.hh"
 
+#include <string>
 #include <sstream>
 
 using namespace chess;
@@ -63,8 +64,10 @@ int Position::set_fen(const std::string &fen)
 	Rank rank = Rank::Eight;
 
 	bool is_in_hand = false;
-	bool lichess_style = false;
 	bool next_piece_is_promoted = false;
+#if !defined(CRAZYHOUSE)
+	(void)is_in_hand, (void)next_piece_is_promoted;
+#endif
 
 	for (char c : token)
 	{
@@ -87,10 +90,7 @@ int Position::set_fen(const std::string &fen)
 
 			// Lichess crazyhouse FENs contain a 9th rank for storing pieces in hand
 			if (!is_valid(rank))
-			{
 				is_in_hand = true;
-				lichess_style = true;
-			}
 
 			continue;
 		}

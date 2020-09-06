@@ -32,7 +32,7 @@ void Option::reset()
 }
 
 ComboOption::ComboOption(std::string_view name, std::string_view default_value,
-						std::unordered_set<std::string> choices, std::string_view help)
+						 const std::unordered_set<std::string> &choices, std::string_view help)
 	: Option(name, OptionType::Combo, help), _value(default_value),
 		_default_value(default_value), _choices(choices)
 {
