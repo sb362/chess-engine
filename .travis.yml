@@ -19,7 +19,7 @@ addons:
     - g++-9
 
 install:
-  - pip3 install meson ninja
+  - python3 -m pip install meson ninja
   - if [ "$CXX" = "g++" ]; then export CXX="g++-9"; fi
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-9"; fi
   - ${CXX} -v
