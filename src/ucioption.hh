@@ -51,7 +51,8 @@ private:
 
 public:
 	ComboOption(std::string_view name, std::string_view default_value,
-				std::unordered_set<std::string> choices, std::string_view help = "");
+				const std::unordered_set<std::string> &choices,
+				std::string_view help = "");
 
 	const std::string &default_value() const;
 	const std::string &value() const;

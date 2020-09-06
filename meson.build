@@ -23,6 +23,8 @@ use_bmi2 = get_option('use_bmi2')
 
 build_tests = get_option('build_tests')
 
+crazyhouse = get_option('crazyhouse')
+
 cc = meson.get_compiler('cpp')
 
 # Check for 64-bit architecture
@@ -61,6 +63,10 @@ add_project_arguments('-DUSE_' + attack_gen.to_upper(), language : 'cpp')
 
 if (attack_gen == 'pext' or attack_gen == 'pdep') and not use_bmi2
 	warning('PEXT or PEXT+PDEP attack generation selected, but BMI2 not enabled.')
+endif
+
+if crazyhouse
+	add_project_arguments('-DCRAZYHOUSE', language : 'cpp')
 endif
 
 summary(
