@@ -35,6 +35,8 @@ endif
 # Disable dumb warnings
 if cc.get_id() == 'gcc'
 	add_project_arguments('-Wno-class-memaccess', language : 'cpp')
+elif cc.get_id() == 'clang'
+	add_project_arguments('-Wno-deprecated-copy', language : 'cpp')
 endif
 
 # Intrinsics
